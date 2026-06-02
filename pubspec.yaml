@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   avatar_glow: ^3.0.1
+  speech_to_text: ^7.4.0
   flutter:
     sdk: flutter
 
