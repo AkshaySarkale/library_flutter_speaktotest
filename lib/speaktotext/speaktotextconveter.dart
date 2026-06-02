@@ -46,7 +46,6 @@ class _SpeaktotextconveterState extends State<Speaktotextconveter> {
           });
         },
       );
-
       setState(() {});
     } catch (e) {
       setState(() {
@@ -57,25 +56,22 @@ class _SpeaktotextconveterState extends State<Speaktotextconveter> {
 
   void _startListening() {
     if (!isAvailable) return;
-
     speech.listen(
       listenMode: ListenMode.dictation,
       onResult: (result) {
         setState(() {
           text = result.recognizedWords;
+          print(text);
         });
-
         if (widget.onResult != null) {
           widget.onResult!(text);
         }
       },
     );
   }
-
   void _stopListening() {
     speech.stop();
   }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -101,9 +97,7 @@ class _SpeaktotextconveterState extends State<Speaktotextconveter> {
               child: Icon(widget.icon, size: 40),
             ),
           ),
-
           const SizedBox(height: 20),
-
           Padding(
             padding: const EdgeInsets.all(12),
             child: Text(
