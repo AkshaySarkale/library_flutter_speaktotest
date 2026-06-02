@@ -22,11 +22,9 @@ class Speaktotextconveter extends StatefulWidget {
 
 class _SpeaktotextconveterState extends State<Speaktotextconveter> {
   final SpeechToText speech = SpeechToText();
-
-  bool startRecording = false;
+  bool isListening = false;
   bool isAvailable = false;
-
-  String text = "Press mic button to start recording";
+  String text = "Press mic button to start speaking";
 
   @override
   void initState() {
@@ -36,24 +34,12 @@ class _SpeaktotextconveterState extends State<Speaktotextconveter> {
 
   Future<void> _initSpeech() async {
     try {
-      isAvailable = await speech.initialize(
-        onStatus: (status) {
-          // optional debugging
-        },
-        onError: (error) {
-          setState(() {
-            text = "Error: ${error.errorMsg}";
-          });
-        },
-      );
+      isAvailable = await speech.initialize();
       setState(() {});
     } catch (e) {
-      setState(() {
-        text = "Speech init failed";
-      });
+      text = "Speech initialization failed";
     }
   }
-
   void _startListening() {
     if (!isAvailable) return;
     speech.listen(
@@ -61,53 +47,39 @@ class _SpeaktotextconveterState extends State<Speaktotextconveter> {
       onResult: (result) {
         setState(() {
           text = result.recognizedWords;
-          print(text);
         });
-        if (widget.onResult != null) {
-          widget.onResult!(text);
-        }
+        widget.onResult?.call(text);
       },
     );
   }
+
   void _stopListening() {
     speech.stop();
   }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AvatarGlow(
-            animate: widget.animate && startRecording,
-            glowColor: widget.animateColor,
-            child: GestureDetector(
-              onTapDown: (_) {
-                setState(() {
-                  startRecording = true;
-                });
-                _startListening();
-              },
-              onTapUp: (_) {
-                setState(() {
-                  startRecording = false;
-                });
-                _stopListening();
-              },
-              child: Icon(widget.icon, size: 40),
-            ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AvatarGlow(
+          animate: widget.animate && isListening,
+          glowColor: widget.animateColor,
+          child: GestureDetector(
+            onTapDown: (value) {
+              setState(() => isListening = true);
+              _startListening();
+            },
+            onTapUp: (value) {
+              setState(() => isListening = false);
+              _stopListening();
+            },
+            child: Icon(widget.icon, size: 50),
           ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20),
+        Text(text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16),),
+      ],
     );
   }
 }
